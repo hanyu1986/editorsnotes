@@ -42,23 +42,16 @@ class Command(BaseCommand):
                 fields = v.object._meta.get_all_field_names()
                 object_fields[object_name] = fields
 
-            approved_fields = object_fields[object_name]
+            current_fields = object_fields[object_name]
             version_fields = v_data[0]['fields']
-            bad_fields = [f for f in version_fields if f not in approved_fields]
+            bad_fields = [f for f in version_fields if f not in current_fields]
 
             for bad_field in bad_fields:
                 deprecated_fields_dict[object_name].add(bad_field)
 
-            if options['delete_fields'] and not options['list_fields']:
-                for field_to_remove in bad_fields:
-                    del(v_data[0]['fields'][field_to_remove])
-                v.serialized_data = json.dumps(v_data)
-                v.save()
-                updated_counter += 1
-
             if options['list_fields']:
                 new_model_fields = list(set.difference(
-                    set(approved_fields), set(version_fields)))
+                    set(current_fields), set(version_fields)))
                 if not new_fields_dict.has_key(object_name):
                     # Check each newly created field for 'blank=False'
                     new_fields_for_obj = []
@@ -68,6 +61,13 @@ class Command(BaseCommand):
                             new_fields_for_obj.append(f)
 
                     new_fields_dict[object_name] = new_fields_for_obj
+
+            elif options['delete_fields']:
+                for field_to_remove in bad_fields:
+                    del(v_data[0]['fields'][field_to_remove])
+                v.serialized_data = json.dumps(v_data)
+                v.save()
+                updated_counter += 1
 
 
         deprecated_fields = ['%s: %s' % ( obj, ', '.join(list(fields)) )
@@ -81,8 +81,8 @@ class Command(BaseCommand):
             self.stderr.write('\nNew required fields by version model:\n%s\n\n' % (
                 '\n'.join(new_fields) or 'None'))
         elif options['delete_fields']:
-            self.stderr.write('Deprecated fields by version model:\n%s' % (
+            self.stderr.write('\nDeprecated fields by version model:\n%s\n' % (
                 '\n'.join(deprecated_fields)))
-            self.stderr.write('%s version models updated' % updated_counter)
+            self.stderr.write('\n%s version models updated\n' % updated_counter)
         if options['update_fields']:
             pass
