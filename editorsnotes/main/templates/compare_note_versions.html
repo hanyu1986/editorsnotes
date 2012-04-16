@@ -1,0 +1,17 @@
+{% load display %}
+
+<div class="well">
+  <h3>Summary of changes</h3>
+</div>
+
+{{ diffs.note|safe }}
+
+<h4>Sources</h4>
+{% for cd in diffs.cites %}
+  {{ cd.document.as_html }}
+  {% if cd.diff %}
+  <div class="citation-notes">
+    {{ cd.diff|safe }}
+  </div>
+  {% endif %}
+{% endfor %}

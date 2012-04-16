@@ -12,6 +12,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from haystack.query import SearchQuerySet, EmptySearchQuerySet
 from reversion import get_unique_for_object
+from reversion.models import Revision
 from urllib import urlopen
 from models import *
 from editorsnotes.djotero.utils import as_readable
@@ -178,6 +179,83 @@ def note(request, note_id):
     return render_to_response(
         'note.html', o, context_instance=RequestContext(request))
 
+def revision_to_dict(revision_id):
+    # Content types for filtering
+    note_ct = ContentType.objects.get_for_model(Note)
+    topic_ct = ContentType.objects.get_for_model(TopicAssignment)
+    cite_ct = ContentType.objects.get_for_model(Citation)
+
+    revision_object = get_object_or_404(Revision, id=revision_id)
+    revision_versions = revision_object.version_set
+
+    revision = {
+        'note': revision_versions.get(content_type=note_ct),
+        'topics': revision_versions.filter(content_type=topic_ct),
+        'cites': revision_versions.filter(content_type=cite_ct)
+    }
+    return revision
+
+def note_at_revision(request, note_id, revision_id):
+    base_note = get_object_or_404(Note, id=note_id)
+
+    rev1 = revision_to_dict(revision_id)
+    if not base_note == rev1['note'].object:
+        return HttpResponseBadRequest()
+
+    o = {}
+    o['history'] = get_unique_for_object(base_note)
+    o['revision_id'] = revision_id
+    o['current_history_idx'] = o['history'].index(rev1['note'])
+
+    if not request.GET.get('compare'):
+        o['note'] = rev1['note'].object_version.object
+        o['topics'] = [ ta.object.topic for ta in rev1['topics'] ]
+        o['cites'] = {'all' : [ c.object_version.object for c in rev1['cites'] ]}
+
+    else:
+        o['note'] = base_note
+        rev2 = revision_to_dict(request.GET.get('compare'))
+        if not base_note == rev2['note'].object:
+            return HttpResponseBadRequest()
+
+        o['diffs'] = {}
+
+        o['diffs']['note'] = utils.compare_elements(
+            rev1['note'].field_dict['content'],
+            rev2['note'].field_dict['content']
+        )
+
+        o['diffs']['cites'] = []
+        rev1_cite_ids = []
+        for cite1 in rev1['cites']:
+            cited_document = Document.objects.get(id=cite1.field_dict['document'])
+            cite2 = rev2['cites'].filter(object_id=cite1.object_id)
+            if cite2:
+                diff = utils.compare_elements(
+                    cite1.field_dict['notes'],
+                    cite2[0].field_dict['notes']
+                )
+            else:
+                diff = utils.compare_elements(
+                    cite1.field_dict['notes'],
+                    ''
+                )
+            o['diffs']['cites'].append(
+                {'document' : cited_document, 'diff' : diff})
+            rev1_cite_ids.append(cite1.object_id)
+
+        for cite in rev2['cites'].exclude(object_id__in=rev1_cite_ids):
+            cited_document = Document.objects.get(id=cite.field_dict['document'])
+            diff = utils.compare_elements(
+                '',
+                cite.field_dict['notes']
+            )
+            o['diffs']['cites'].append(
+                {'document' : cited_document, 'diff' : diff})
+        
+    return render_to_response(
+            'note.html', o, context_instance=RequestContext(request))
+    
 @login_required
 def footnote(request, footnote_id):
     o = {}

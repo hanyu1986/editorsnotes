@@ -8,6 +8,25 @@
 <script type="text/javascript" src="/media/function/models/note.js"></script>
 {% endblock %}
 
+{% block css %}
+<style type="text/css">
+  .viewing-revision {
+    margin: .5em 0;
+    padding: .5em 0;
+  }
+  .viewing-revision span {
+    padding: .5em .25em;
+    background: red;
+  }
+  .diff-added * {
+    background: green;
+  }
+  .diff-removed * {
+    background: red;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
     <header>
       <h2>{{ note.title|typogrify }}</h2>
@@ -30,40 +49,64 @@
 
     <div class="tab-content">
       <section id="note" class="tab-pane active">
-        <article id="note-{{ note.id }}" class="note">
-          <div class="note-content">
-            {{ note.content|as_html }}
-          </div>
-          {% if cites.all %}
-          <h4>Sources</h4>
-          <div class="citation-list">
-            {% for cite in cites.all %}
-              {% include "citation.include" %}
-            {% endfor %}
-          </div>
+        {% if diffs %}
+
+          {% include "compare_note_versions.html" %}
+
+        {% else %}
+
+          {% if current_history_idx %} 
+            <div class="well">
+              <p>Currently viewing note at revision {{ revision_id }}, saved at {{ note.last_updated }} by {{ note.last_updater.get_profile|as_link }}.</p> 
+            </div>
           {% endif %}
-          <div class="row edit-row">
-            <div class="span6 edit-button">
-              <a class="btn" href="{{ note.get_admin_url }}?return_to={{ request.path }}">Edit</a>
+          <article id="note-{{ note.id }}" class="note">
+            <div class="note-content">
+              {{ note.content|as_html }}
             </div>
-            <div class="span6 edit-history">
-              {{ note|display_edit_history }}
+            {% if cites.all %}
+            <h4>Sources</h4>
+            <div class="citation-list">
+              {% for cite in cites.all %}
+                {% include "citation.include" %}
+              {% endfor %}
             </div>
-          </div>
-        </article>
+            {% endif %}
+            <div class="row edit-row">
+              <div class="span6 edit-button">
+                <a class="btn" href="{{ note.get_admin_url }}?return_to={{ request.path }}">Edit</a>
+              </div>
+              <div class="span6 edit-history">
+                {{ note|display_edit_history }}
+              </div>
+            </div>
+          </article>
+
+        {% endif %}
       </section>
 
       <section id="history" class="tab-pane">
         <p>Showing {{ history|length }} revisions, most recent first.</p>
         <ol>
+        {% with newest_revision=history.0.revision_id %}
         {% for version in history %}
           {% with fields=version.field_dict %}
           <li>
-            {{ fields.last_updated|date }} by {{ fields.last_updater|user_from_id }}
-            (<a href="history/?compare={{ version.revision_id }}">compare</a>)
+            {% if not current_history_idx and forloop.counter0 == 0 or forloop.counter0 == current_history_idx %}
+              <div class="viewing-revision">
+                <span>
+                {{ fields.last_updated|date }} by {{ fields.last_updater|user_from_id }} (Currently viewing)
+                </span>
+              </div>
+            {% else %}
+              {{ fields.last_updated|date }} by {{ fields.last_updater|user_from_id }}
+              (<a href="{% url note_at_revision_view note_id=note.id revision_id=version.revision_id %}">View</a>)
+              (<a href="{% if current_history_idx %}{{ request.path }}{% else %}{% url note_at_revision_view note_id=note.id revision_id=newest_revision %}{% endif %}?compare={{ version.revision_id }}">Compare</a>)
+            {% endif %}
           </li>
           {% endwith %}
         {% endfor %}
+        {% endwith %}
         </ol>
       </section>
     </div>

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+import HTMLParser
 from lxml import etree
 from pytz import timezone, utc
+from diff_match_patch import diff_match_patch
 from django.conf import settings
 
 textify = etree.XSLT(etree.parse(
@@ -63,6 +65,28 @@ def alpha_columns(items, sortattr, num_columns=3, itemkey='item'):
         item_index += 1
     return columns
 
-    
-    
-        
+def html_from_diffs(diffs):
+    html = []
+    i = 0
+    DIFF_INSERT = 1
+    DIFF_DELETE = -1
+    DIFF_EQUAL = 0
+    for (op, data) in diffs:
+        if op == DIFF_INSERT:
+            html.append('<span class="diff-added">%s</span>' % data)
+        elif op == DIFF_DELETE:
+            html.append('<span class="diff-removed">%s</span>' % data)
+        elif op == DIFF_EQUAL:
+            html.append('<span class="diff-unchanged">%s</span>' % data)
+    return ''.join(html)
+
+def compare_elements(e1, e2):
+    e1_string = etree.tostring(e1) if e1 else ''
+    e2_string = etree.tostring(e2) if e2 else ''
+    if e1_string != e2_string:
+        dmp = diff_match_patch()
+        diffs = dmp.diff_main(e1_string, e2_string)
+        dmp.diff_cleanupSemantic(diffs)
+        return html_from_diffs(diffs)
+    else:
+        return e1_string
