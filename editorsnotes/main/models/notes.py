@@ -4,6 +4,7 @@ from lxml import etree
 from model_utils.managers import InheritanceManager
 
 from .. import fields
+from auth import ProjectPermissionsMixin
 from base import (Administered, LastUpdateMetadata, ProjectSpecific,
                   URLAccessible)
 
@@ -13,7 +14,8 @@ NOTE_STATUS_CHOICES = (
     ('2', 'Hibernating')
 )
 
-class Note(LastUpdateMetadata, Administered, URLAccessible, ProjectSpecific):
+class Note(LastUpdateMetadata, Administered, URLAccessible,
+           ProjectSpecific, ProjectPermissionsMixin):
     u""" 
     Text written by an editor or curator. The text is stored as XHTML,
     so it may have hyperlinks and all the other features that XHTML
