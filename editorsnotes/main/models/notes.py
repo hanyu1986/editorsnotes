@@ -35,7 +35,9 @@ class Note(LastUpdateMetadata, Administered, URLAccessible, ProjectPermissionsMi
     def get_affiliation(self):
         return self.project
     def has_topic(self, topic):
-        return topic.id in self.topics.values_list('topic_id', flat=True)
+        return topic.id in self.topics\
+                .select_related('container')\
+                .values_list('container__topic_id', flat=True)
 
 class NoteSection(LastUpdateMetadata, ProjectPermissionsMixin):
     u"""
