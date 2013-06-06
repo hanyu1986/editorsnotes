@@ -48,6 +48,9 @@ class ProcessInlineFormsetsView(View):
         for fs in formsets.values():
             save_method = getattr(
                 self, 'save_%s_formset_form' % fs.prefix, 'save_formset_form')
+            save_method = getattr(
+                self, 'save_{}_formset_form'.format(fs.prefix),
+                self.save_formset_form)
             for form in fs:
                 if not form.has_changed() or not form.is_valid():
                     continue

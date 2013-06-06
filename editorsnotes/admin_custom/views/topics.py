@@ -24,4 +24,11 @@ class TopicAdminView(BaseAdminView):
             obj.creator = self.request.user
         obj.last_updater = self.request.user
         obj.save()
+    def save_alias_formset_form(self, form):
+        obj = form.save(commit=False)
+        if not obj.id:
+            obj.creator = self.request.user
+        obj.topic = self.object
+        obj.save()
+
 
