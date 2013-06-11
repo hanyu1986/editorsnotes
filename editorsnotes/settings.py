@@ -127,7 +127,7 @@ INSTALLED_APPS = (
     'editorsnotes.djotero',
     #'editorsnotes.refine',
     'editorsnotes.admin_custom',
-    #'editorsnotes.api',
+    'editorsnotes.api',
 )
 
 STATICFILES_FINDERS = (
