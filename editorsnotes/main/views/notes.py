@@ -15,7 +15,9 @@ def note(request, note_id, project_slug=None):
     o['topics'] = [ta.topic for ta in o['note'].topics.all()]
     o['sections'] = o['note'].sections\
             .order_by('ordering', 'note_section_id')\
-            .select_subclasses()
+            .select_subclasses()\
+            .select_related('citationns__document__project',
+                            'notereferencens__note_reference__project')
     return render_to_response(
         'note.html', o, context_instance=RequestContext(request))
 
