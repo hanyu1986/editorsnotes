@@ -2,9 +2,7 @@
 
 import json
 
-from haystack import site
-from haystack.indexes import (
-    RealTimeSearchIndex, CharField, DateTimeField, MultiValueField)
+from haystack import indexes
 
 from editorsnotes.djotero.utils import get_creator_name
 
@@ -12,20 +10,26 @@ from models.documents import Document, Footnote, Transcript
 from models.notes import Note
 from models.topics import TopicNode
 
-class DocumentIndex(RealTimeSearchIndex):
-    title = CharField(model_attr='as_text')
-    text = CharField(document=True, use_template=True)
-    project = CharField(model_attr='project')
-    project_slug = MultiValueField(faceted=True)
+class DocumentIndex(indexes.SearchIndex, indexes.Indexable):
+    title = indexes.CharField(model_attr='as_text')
+    text = indexes.CharField(document=True, use_template=True)
+    autocomplete = indexes.EdgeNgramField(model_attr='description')
+    project = indexes.CharField(model_attr='project')
+    project_slug = indexes.MultiValueField(faceted=True)
 
-    related_topic_id = MultiValueField(faceted=True)
-    representations = MultiValueField(faceted=True)
+    related_topic_id = indexes.MultiValueField(faceted=True)
+    representations = indexes.MultiValueField(faceted=True)
 
     # Zotero fields
-    creators = MultiValueField(faceted=True)
-    archive = CharField(faceted=True)
-    itemType = CharField(faceted=True)
-    publicationTitle = CharField(faceted=True)
+    creators = indexes.MultiValueField(faceted=True)
+    archive = indexes.CharField(faceted=True)
+    itemType = indexes.CharField(faceted=True)
+    publicationTitle = indexes.CharField(faceted=True)
+    def get_model(self):
+        return Document
+    def index_queryset(self, using=None):
+        return self.get_model().objects.exclude(import_id__startswith='inglis')
+
     def prepare_related_topic_id(self, obj):
         return [t.id for t in obj.get_all_related_topics()]
     def prepare_representations(self, obj):
@@ -53,57 +57,55 @@ class DocumentIndex(RealTimeSearchIndex):
         self.prepared_data['creators'] = [n for n in names if n]
 
         return self.prepared_data
-    def get_model(self):
-        return Document
-    def index_queryset(self):
-        return self.get_model().objects.exclude(import_id__startswith='inglis')
 
 
-class TranscriptIndex(RealTimeSearchIndex):
-    title = CharField(model_attr='as_text')
-    text = CharField(document=True, use_template=True)
+class TranscriptIndex(indexes.SearchIndex, indexes.Indexable):
+    title = indexes.CharField(model_attr='as_text')
+    text = indexes.CharField(document=True, use_template=True)
     def get_model(self):
         return Transcript
-    def index_queryset(self):
+    def index_queryset(self, using=None):
         return self.get_model().objects.exclude(
             document__import_id__startswith='inglis')
 
-class FootnoteIndex(RealTimeSearchIndex):
-    title = CharField(model_attr='as_text')
-    text = CharField(document=True, use_template=True)
+class FootnoteIndex(indexes.SearchIndex, indexes.Indexable):
+    title = indexes.CharField(model_attr='as_text')
+    text = indexes.CharField(document=True, use_template=True)
+    def get_model(self):
+        return Footnote
 
-class TopicIndex(RealTimeSearchIndex):
-    title = CharField(model_attr='as_text')
-    text = CharField(document=True, use_template=True)
-    names = CharField(use_template=True)
-    project = MultiValueField()
-    project_slug = MultiValueField(faceted=True)
-    related_topic_id = MultiValueField(faceted=True)
+class TopicIndex(indexes.SearchIndex, indexes.Indexable):
+    title = indexes.CharField(model_attr='as_text')
+    text = indexes.CharField(document=True, use_template=True)
+    autocomplete = indexes.EdgeNgramField(model_attr='_preferred_name')
+    names = indexes.CharField(use_template=True)
+    project = indexes.MultiValueField()
+    project_slug = indexes.MultiValueField(faceted=True)
+    related_topic_id = indexes.MultiValueField(faceted=True)
+    def get_model(self):
+        return TopicNode
+    def index_queryset(self, using=None):
+        return self.get_model().objects.select_related('project_containers__project')
     def prepare_project(self, obj):
         return [pc.project.name for pc in obj.project_containers.all()]
     def prepare_project_slug(self, obj):
         return [pc.project.slug for pc in obj.project_containers.all()]
     def prepare_related_topic_id(self, obj):
         return [ta.id for ta in obj.related_objects(model=TopicNode)]
-    def index_queryset(self):
-        return self.model.objects.select_related('project_containers__project')
 
-class NoteIndex(RealTimeSearchIndex):
-    title = CharField(model_attr='as_text')
-    text = CharField(document=True, use_template=True)
-    project = CharField(model_attr='project')
-    project_slug = MultiValueField(faceted=True)
-    related_topic_id = MultiValueField(faceted=True)
-    last_updated = DateTimeField(model_attr='last_updated')
+class NoteIndex(indexes.SearchIndex, indexes.Indexable):
+    title = indexes.CharField(model_attr='as_text')
+    text = indexes.CharField(document=True, use_template=True)
+    autocomplete = indexes.EdgeNgramField(model_attr='title')
+    project = indexes.CharField(model_attr='project')
+    project_slug = indexes.MultiValueField(faceted=True)
+    related_topic_id = indexes.MultiValueField(faceted=True)
+    last_updated = indexes.DateTimeField(model_attr='last_updated')
+    def get_model(self):
+        return Note
+    def index_queryset(self, using=None):
+        return self.get_model().objects.select_related('project')
     def prepare_project_slug(self, obj):
         return [obj.project.slug]
     def prepare_related_topic_id(self, obj):
         return [t.topic.id for t in obj.topics.all()]
-    def index_queryset(self):
-        return self.model.objects.select_related('project')
-
-site.register(Document, DocumentIndex)
-site.register(Transcript, TranscriptIndex)
-site.register(Footnote, FootnoteIndex)
-site.register(TopicNode, TopicIndex)
-site.register(Note, NoteIndex)

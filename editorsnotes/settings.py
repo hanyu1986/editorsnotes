@@ -52,8 +52,15 @@ AUTHENTICATION_BACKENDS = (
     'django_browserid.auth.BrowserIDBackend',
 )
 
-HAYSTACK_SITECONF = 'editorsnotes.search_sites'
-HAYSTACK_SEARCH_ENGINE = 'xapian'
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'en_haystack'
+
+    }
+}
 
 
 #################
@@ -76,7 +83,6 @@ try:
 except ImportError:
     STORAGE_PATH = EN_PROJECT_PATH
 
-HAYSTACK_XAPIAN_PATH = os.path.abspath(os.path.join(STORAGE_PATH, 'searchindex'))
 MEDIA_ROOT = os.path.abspath(os.path.join(STORAGE_PATH, 'uploads'))
 STATIC_ROOT = os.path.abspath(os.path.join(STORAGE_PATH, 'static'))
 
