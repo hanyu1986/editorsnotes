@@ -114,3 +114,5 @@ class NoteReferenceNS(NoteSection):
         app_label = 'main'
     def __unicode__(self):
         return u'Note section -- reference -- {}'.format(self.note_reference)
+    def has_content(self):
+        return self.content is not None
