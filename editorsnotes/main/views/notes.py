@@ -18,6 +18,10 @@ def note(request, note_id, project_slug=None):
             .select_subclasses()\
             .select_related('citationns__document__project',
                             'notereferencens__note_reference__project')
+
+    o['can_edit'] = request.user.is_authenticated() and \
+            request.user.has_project_perm(o['note'].project, 'main.change_note')
+
     return render_to_response(
         'note.html', o, context_instance=RequestContext(request))
 
