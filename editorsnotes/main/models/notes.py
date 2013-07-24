@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
 from lxml import etree
 from model_utils.managers import InheritanceManager
+from reversion.models import Revision
 
 from .. import fields
 from auth import ProjectPermissionsMixin
@@ -41,6 +43,14 @@ class Note(LastUpdateMetadata, Administered, URLAccessible, ProjectPermissionsMi
         return topic.id in self.topics\
                 .select_related('container')\
                 .values_list('container__topic_id', flat=True)
+    def get_all_updaters(self):
+        note_ct = ContentType.objects.get_for_model(Note)
+        qs = Revision.objects\
+                .select_related('user', 'version')\
+                .distinct('user')\
+                .filter(version__content_type_id=note_ct.id,
+                        version__object_id_int=self.id)
+        return [revision.user for revision in qs]
 
 class NoteSection(LastUpdateMetadata, ProjectPermissionsMixin):
     u"""
