@@ -123,6 +123,7 @@ INSTALLED_APPS = (
     'compressor',
     'rest_framework',
     'rest_framework.authtoken',
+    'licensing',
     'editorsnotes.main',
     'editorsnotes.djotero',
     #'editorsnotes.refine',
