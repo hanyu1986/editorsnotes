@@ -1,3 +1,5 @@
+from collections import Counter
+
 from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -50,10 +52,10 @@ class Note(LastUpdateMetadata, Administered, URLAccessible, ProjectPermissionsMi
         note_ct = ContentType.objects.get_for_model(Note)
         qs = Revision.objects\
                 .select_related('user', 'version')\
-                .distinct('user')\
                 .filter(version__content_type_id=note_ct.id,
                         version__object_id_int=self.id)
-        return [revision.user for revision in qs]
+        user_counter = Counter([revision.user for revision in qs])
+        return [user for user, count in user_counter.most_common()]
 
 class NoteSection(LastUpdateMetadata, ProjectPermissionsMixin):
     u"""
