@@ -1,3 +1,7 @@
+/*
+ * NOTE: this should be replaced to use backbone, save state, do more, etc.
+ */
+
 (function($) {
 
   $.fn.facet = function(method) {
