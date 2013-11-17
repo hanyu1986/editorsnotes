@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load typogrify display note_sections staticfiles %}
+{% load typogrify display note_sections staticfiles backbone %}
 
 {% block title %}: {{ note.title }}{% endblock %}
 
@@ -12,9 +12,14 @@
 
   <script type="text/javascript" src="{% static "function/backbone/app.js" %}"></script>
   <script type="text/javascript" src="{% static "function/backbone/models.js" %}"></script>
+  {% comment %}
   <script type="text/javascript" src="{% static "function/backbone/templates.js" %}"></script>
+  {% endcomment %}
   <script type="text/javascript" src="{% static "function/backbone/views.js" %}"></script>
   <script type="text/javascript" src="{% static "function/note.js" %}"></script>
+
+  {% make_backbone_templates "function/backbone/templates" %}
+
   {% endif %}
 
 {% endblock %}

@@ -322,7 +322,7 @@ EditorsNotes.Views['NoteSection'] = Backbone.View.extend({
   render: function () {
     var that = this
       , sectionType = this.model.get('section_type')
-      , template = EditorsNotes.Templates['note_sections/' + sectionType]
+      , template = EditorsNotes.Templates['note_sections-' + sectionType]
 
     this.$el.html( template({ns: that.model.toJSON()}) );
     this.afterRender && this.afterRender.call(this);
@@ -720,7 +720,7 @@ EditorsNotes.Views['EditZoteroInformation'] = Backbone.View.extend({
 
     $.getJSON('/api/document/itemtypes/')
       .done(function (itemTypes) {
-        var select = EditorsNotes.Templates['zotero/item_type_select'](itemTypes)
+        var select = EditorsNotes.Templates['zotero-item_type_select'](itemTypes)
 
         that.$el.html('<hr />' + select);
         that.$('select').prop('selectedIndex', -1);
