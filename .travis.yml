@@ -4,7 +4,7 @@ python:
   - "2.7"
 
 install:
-  - "export CFLAGS=\"O0\" && pip install -r requirements.txt"
+  - "export CFLAGS=\"-O0\" && pip install -r requirements.txt"
   - "pip install -q fabric==1.5.1"
 
 before_script:
