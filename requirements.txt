@@ -17,7 +17,7 @@ psycopg2==2.4.6
 
 isodate==0.4.9
 pytz==2012h
-refine-client==0.2.1
+refine-client==0.2.4
 smartypants==1.6.0.3
 
 ipython==0.13.1
