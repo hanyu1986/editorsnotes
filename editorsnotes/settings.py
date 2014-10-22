@@ -44,6 +44,9 @@ STATIC_URL = '/static/'
 ROOT_URLCONF = 'editorsnotes.urls'
 
 AUTH_USER_MODEL = 'main.User'
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'django_browserid.auth.BrowserIDBackend',

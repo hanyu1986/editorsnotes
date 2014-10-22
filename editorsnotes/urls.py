@@ -15,11 +15,12 @@ urlpatterns = patterns('',
 
 # Auth patterns
 urlpatterns += patterns('',
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login', { 'redirect_field_name': 'return_to' }, name='user_login_view'),
-    url(r'^accounts/logout/$', 'editorsnotes.main.views.auth.user_logout', name='user_logout_view'),
-    url(r'^accounts/profile/$', 'editorsnotes.main.views.auth.user'),
-    url(r'^accounts/profile/feedback/$', 'editorsnotes.main.views.auth.user_feedback', name='user_feedback_view'),
-    url(r'^accounts/browserid/$', CustomBrowserIDVerify.as_view(), name='browserid_verify'),
+    url(r'^login/$', 'django.contrib.auth.views.login', { 'redirect_field_name': 'return_to' }, name='user_login_view'),
+    url(r'^logout/$', 'editorsnotes.main.views.auth.user_logout', name='user_logout_view'),
+    url(r'^signup/$', 'editorsnotes.main.views.auth.user_signup', name='user_signup_view'),
+    url(r'^profile/$', 'editorsnotes.main.views.auth.user'),
+    url(r'^profile/feedback/$', 'editorsnotes.main.views.auth.user_feedback', name='user_feedback_view'),
+    url(r'^browserid/$', CustomBrowserIDVerify.as_view(), name='browserid_verify'),
     url(r'^user/(?P<username>[\w@\+\.\-]+)/$', 'editorsnotes.main.views.auth.user', name='user_view'),
 )
 
@@ -27,7 +28,7 @@ urlpatterns += patterns('',
 urlpatterns += patterns('editorsnotes.main.views.navigation',
     url(r'^$', 'index', name='index_view'),
     url(r'^about/$', 'about', name='about_view'),
-    url(r'^about/test/$', 'about_test'),
+    url(r'^about/test/$', 'about_test', name='about_test'),
     url(r'^search/$', 'search', name='search_view'),
 )
 

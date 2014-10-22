@@ -11,7 +11,7 @@ from django_browserid.views import Verify
 import reversion
 
 from editorsnotes.search import get_index
-from ..forms import UserFeedbackForm
+from ..forms import UserFeedbackForm, UserSignupForm
 from ..models import User, Project, ProjectInvitation, UserFeedback
 
 @reversion.create_revision()
@@ -42,7 +42,7 @@ def create_invited_user(email):
     return new_user
 
 class CustomBrowserIDVerify(Verify):
-    failure_url = '/accounts/login/'
+    failure_url = '/login/'
     def get_success_url(self):
         return self.request.GET.get('return_to',
                                     self.request.user.get_absolute_url())
@@ -51,6 +51,24 @@ def user_logout(request):
     auth.logout(request)
     return render_to_response(
         'logout.html', context_instance=RequestContext(request))
+
+def user_signup(request):
+    o = {}
+    if request.method == 'POST':
+
+        o['form'] = UserSignupForm(request.POST, request=request)
+
+        if o['form'].is_valid():
+            new_user = o['form'].save()
+            authenticated_user = auth.authenticate(
+                username=o['form'].cleaned_data['username'],
+                password=o['form'].cleaned_data['password1'])
+            auth.login(request, authenticated_user)
+            return HttpResponseRedirect('/')
+    else:
+        o['form'] = UserSignupForm(request=request)
+    return render_to_response(
+        'signup.html', o, context_instance=RequestContext(request))
 
 def user(request, username=None):
     o = {}

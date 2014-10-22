@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style type="text/css">
+#signup-form {
+  width: 600px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Sign up</h1>
+<form id="signup-form" class="form-horizontal">
+  {% csrf_token %}
+
+  {% include "includes/bootstrap_field.html" with field=form.username %}
+  {% include "includes/bootstrap_field.html" with field=form.email %}
+  {% include "includes/bootstrap_field.html" with field=form.first_name %}
+  {% include "includes/bootstrap_field.html" with field=form.last_name %}
+  <hr />
+  {% include "includes/bootstrap_field.html" with field=form.password1 %}
+  {% include "includes/bootstrap_field.html" with field=form.password2 %}
+  <hr />
+  <div id="uc">
+  {% include "includes/bootstrap_field.html" with field=form.honeypot %}
+  </div>
+
+  <div class="control-group">
+    {% include "includes/bootstrap_errors.html" with errors=form.arithmetic_answer.errors %}
+    <img src="{% url "about_test" %}" /> equals {{ form.arithmetic_answer }}
+  </div>
+
+  <button type="submit" formmethod="POST">Submit</button>
+</form>
+
+<script type="text/javascript">
+document.getElementById('uc').style.display = 'none';
+</script>
+{% endblock %}

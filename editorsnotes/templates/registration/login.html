@@ -11,19 +11,43 @@
     margin-bottom: 0px;
   }
 
-  #login > .row {
-    border-color: #ccc;
+  #login-methods {
+    border-color: #eee;
     border-width: 1px 0 1px;
     border-style: solid;
   }
 
+  .login-method {
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  #signup, #namepass-method, #persona-method {
+    font-family: "Source Sans Pro";
+  }
+
+  #namepass-method { border-right: 1px solid #eee; }
+  #persona-method {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  #signup {
+    padding-top: 1.5em;
+    text-align: center;
+    font-family: "Source Sans Pro";
+    font-size: 16px;
+  }
+
+
+  /*
   #all-login-methods {
     margin-left: 18px;
     border-left: 1px solid #ccc
   }
 
-  #invitation-notice p {
-    text-align: justify;
+  #signup p {
     font-family: "Source Sans Pro", sans-serif;
     font-size: 20px;
     margin: 0;
@@ -53,6 +77,7 @@
   #name-pass-login button {
     margin-top: 4px;
   }
+  */
 
 </style>
 {% endblock %}
@@ -84,31 +109,9 @@
 
   <h3>Sign in</h3>
 
-  <div class="row">
+    <div id="login-methods" class="row">
 
-    <div id="invitation-notice" class="span6">
-      <p>New accounts are currently open only by invitation. If you have not received an invitation and would like to use Editors' Notes, <a href="/about/">send us a message</a>.</p>
-    </div>
-
-    <div id="all-login-methods" class="span6">
-      <div class="login-method" id="persona-login">
-        <p>
-          Sign in using your email with <a href="https://login.persona.org/about">Mozilla Persona</a>.
-        </p>
-        <div class="browserid-login-container">
-          <a class="browserid-login" href="{% url "django.contrib.auth.views.login" %}">
-            <img src="{% static "style/icons/plain_sign_in_black.png" %}">
-          </a>
-          <form method="post" action="{% url "browserid_verify" %}">
-            {% csrf_token %}
-            {{ browserid_form.as_p }}
-          </form>
-        </div>
-      </div>
-      <div class="login-method" id="name-pass-login">
-        <p>
-        Alternately, use your username and password.
-        </p>
+      <div id="namepass-method" class="login-method span6">
         <form method="post">
           {% csrf_token %}
           <fieldset>
@@ -121,13 +124,40 @@
             </p>
 
             <p>
-              <button type="submit">Submit</button>
+              <a>Forgot password</a>
+            </p>
+
+            <p>
+              <button class="btn" type="submit">Log in</button>
             </p>
           </fieldset>
           <input type="hidden" name="next" value="{{ next }}" />
         </form>  
       </div>
+
+      <div id="persona-method" class="login-method span6">
+        <p>
+          You can also sign in using your email using <a href="https://login.persona.org/about">Mozilla Persona</a>.
+        </p>
+        <div class="browserid-login-container">
+          <a class="browserid-login" href="{% url "django.contrib.auth.views.login" %}">
+            <img src="{% static "style/icons/plain_sign_in_black.png" %}">
+          </a>
+          <form method="post" action="{% url "browserid_verify" %}">
+            {% csrf_token %}
+            {{ browserid_form.as_p }}
+          </form>
+        </div>
+      </div>
     </div>
+
+
+    <div id="signup" class="row">
+      <div class="login-inner span12">
+        <a href="/signup/">Sign up</a> for an account
+      </div>
+    </div>
+
 
   </div>
 
