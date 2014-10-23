@@ -14,10 +14,14 @@ from PIL import Image, ImageDraw, ImageFont
 
 from editorsnotes.search import get_index
 
+from editorsnotes.admin.views.auth import UserHomeView
+
 from ..forms import FeedbackForm
 from ..models import Document, Note, Project, TopicNode
 
 def index(request):
+    if request.user.is_authenticated():
+        return UserHomeView.as_view()(request)
     o = {}
     return render_to_response(
         'index.html', o, context_instance=RequestContext(request))

@@ -32,6 +32,7 @@ $(document).ready(function () {
 
 AdminRouter = Backbone.Router.extend({
   routes: {
+    '': 'indexView',
     'projects/:project/documents/add/': 'editDocument',
     'projects/:project/documents/:id/edit/': 'editDocument',
     'projects/:project/notes/add/': 'editNote',
@@ -67,6 +68,15 @@ AdminRouter = Backbone.Router.extend({
   makeModelView: function (Model, View, projectSlug, id) {
     var instance = this.makeModelInstance(Model, projectSlug, id);
     return new View({ model: instance, el: '#main' });
+  },
+
+  indexView: function () {
+    var User = require('./models/user')
+      , UserView = require('./views/home')
+      , view
+
+    view = this.makeModelView(User, UserView);
+    this.changeView(view);
   },
 
   editDocument: function (project, id) {

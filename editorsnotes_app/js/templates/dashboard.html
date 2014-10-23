@@ -1,0 +1,16 @@
+<h1><%= user.display_name %> – Home</h1>
+
+<div>Last logged in <%= user.last_login %></div>
+
+<% if (user.projects && user.projects.length) { %>
+<h2>Your projects</h2>
+<ul>
+  <% user.projects.forEach(function (project) { %>
+  <a href="<%= project.url %>"><%= project.name %></a>
+  <% }); %>
+</ul>
+
+<p><a href="NOT REAL">Create a new project</a></p>
+<% } else { %>
+<p>You are not a part of any projects yet. <a href="NOT REAL">Create one</a>.</p>
+<% } %>
