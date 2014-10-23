@@ -5,10 +5,12 @@ from django.shortcuts import get_object_or_404
 from editorsnotes.main.models import Document, Transcript
 from editorsnotes.api.serializers import DocumentSerializer
 
-from common import BaseAdminView, BootstrappedBackboneView
+from common import (BaseAdminView, BreadcrumbMixin, BootstrappedBackboneView,
+                    ProjectSpecificMixin)
 from .. import forms
 
-class DocumentAdminView(BootstrappedBackboneView):
+class DocumentAdminView(ProjectSpecificMixin, BreadcrumbMixin,
+                        BootstrappedBackboneView):
     model = Document
     serializer_class = DocumentSerializer
     def get_object(self, document_id=None):

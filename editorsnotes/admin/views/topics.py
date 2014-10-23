@@ -6,9 +6,11 @@ from django.shortcuts import get_object_or_404
 from editorsnotes.main.models import Topic
 from editorsnotes.api.serializers import TopicSerializer
 
-from common import BootstrappedBackboneView
+from common import (BootstrappedBackboneView, BreadcrumbMixin,
+                    ProjectSpecificMixin)
 
-class TopicAdminView(BootstrappedBackboneView):
+class TopicAdminView(ProjectSpecificMixin, BreadcrumbMixin,
+                     BootstrappedBackboneView):
     model = Topic
     serializer_class = TopicSerializer
     def get_object(self, topic_node_id=None):

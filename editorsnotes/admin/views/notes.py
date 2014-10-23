@@ -6,9 +6,11 @@ from django.shortcuts import get_object_or_404
 from editorsnotes.main.models import Note
 from editorsnotes.api.serializers import NoteSerializer
 
-from common import BootstrappedBackboneView
+from common import (BootstrappedBackboneView, BreadcrumbMixin,
+                    ProjectSpecificMixin)
 
-class NoteAdminView(BootstrappedBackboneView):
+class NoteAdminView(ProjectSpecificMixin, BreadcrumbMixin,
+                    BootstrappedBackboneView):
     model = Note
     serializer_class = NoteSerializer
     def get_object(self, note_id=None):

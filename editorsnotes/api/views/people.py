@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from editorsnotes.main.models import Project, User
 from editorsnotes.search import get_index
 
-from ..serializers.projects import ProjectSerializer
+from ..serializers.people import ProjectSerializer, UserSerializer
 
-__all__ = ['ActivityView', 'ProjectList', 'ProjectDetail']
+__all__ = ['ActivityView', 'ProjectList', 'ProjectDetail', 'UserDetail']
 
 class ProjectList(ListAPIView):
     model = Project
@@ -48,3 +48,10 @@ class ActivityView(GenericAPIView):
         return Response({ 'activity': data })
 
 
+class UserDetail(RetrieveAPIView):
+    model = User
+    serializer_class = UserSerializer
+    def get_object(self):
+        qs = User.objects\
+                .filter(username=self.kwargs['username'])
+        return get_object_or_404(qs)

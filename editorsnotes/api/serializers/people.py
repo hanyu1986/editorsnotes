@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from editorsnotes.main.models import Project
+from editorsnotes.main.models import Project, User
 
 class ProjectSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField('get_api_url')
@@ -23,3 +23,16 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_documents_url(self, obj):
         return reverse('api:api-documents-list', args=(obj.slug,),
                        request=self.context['request'])
+
+class UserSerializer(serializers.ModelSerializer):
+    display_name = serializers.Field('display_name')
+    projects = serializers.SerializerMethodField('get_project_affiliation')
+    class Meta:
+        model = User
+        fields = ('username', 'display_name', 'last_login', 'projects',)
+    def get_project_affiliation(self, obj):
+        return [{
+            'name': project.name,
+            'url': reverse('api:api-project-detail', args=(project.slug,),
+                           request=self.context['request'])
+        } for project in obj.get_affiliated_projects()]

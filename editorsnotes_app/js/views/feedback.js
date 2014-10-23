@@ -3,7 +3,7 @@
 var _ = require('underscore')
   , $ = require('../jquery')
   , Backbone = require('../backbone')
-  , FEEDBACK_URL = '/accounts/profile/feedback/'
+  , FEEDBACK_URL = '/profile/feedback/'
 
 module.exports = Backbone.View.extend({
   events: {

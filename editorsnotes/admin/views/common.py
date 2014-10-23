@@ -109,7 +109,7 @@ class BreadcrumbMixin(object):
         "Override this method with (label, url) pairs to generate page breadcrumb."
         return ()
 
-class BootstrappedBackboneView(ProjectSpecificMixin, BreadcrumbMixin, TemplateView):
+class BootstrappedBackboneView(TemplateView):
     model = None
     serializer_class = None
     template_name = "backbone_bootstrap.html"
@@ -118,9 +118,10 @@ class BootstrappedBackboneView(ProjectSpecificMixin, BreadcrumbMixin, TemplateVi
         assert getattr(self, 'serializer_class'), ("Must define a django-rest"
                                                    "framework serializer as a "
                                                    "serializer class.")
-        if self.object:
+        obj = getattr(self, 'object', self.get_object())
+        if obj:
             serializer_context = { 'request': self.request }
-            serializer = self.serializer_class(self.object, context=serializer_context)
+            serializer = self.serializer_class(obj, context=serializer_context)
             context['bootstrap'] = JSONRenderer().render(serializer.data)
         else:
             context['bootstrap'] = 'null';
