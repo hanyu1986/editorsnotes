@@ -56,14 +56,15 @@ def get_browserify_args(fast=False, exclude_libs=False):
             admin_lib_requires +
             base_lib_excludes +
             ['-o', os.path.join(settings.STATIC_ROOT, 'admin-libs.js')])
+
     commands['base-bundle.js'] = (
         browserify_args +
-        ['--fast'] if fast else [] +
+        (['--fast'] if fast else []) +
         base_lib_excludes +
         [base_index, '-o', os.path.join(settings.STATIC_ROOT, 'base-bundle.js')])
     commands['admin-bundle.js'] = (
         browserify_args +
-        ['--fast'] if fast else [] +
+        (['--fast'] if fast else []) +
         base_lib_excludes +
         admin_lib_excludes +
         [admin_index, '-o', os.path.join(settings.STATIC_ROOT, 'admin-bundle.js')])
